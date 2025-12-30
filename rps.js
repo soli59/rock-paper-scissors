@@ -1,70 +1,62 @@
-// --- Section 1: Helper Functions ---
+// Global Score Variables
+let humanScore = 0;
+let computerScore = 0;
+let gameOver = false;
+
+// UI Element References
+const roundResultDisplay = document.querySelector("#round-result");
+const scoreDisplay = document.querySelector("#score-display");
+const finalWinnerDisplay = document.querySelector("#final-winner");
 
 function getComputerChoice() {
-    let randomNumber = Math.random();
-    if (randomNumber < 0.33) {
-        return "rock";
-    } else if (randomNumber < 0.66) {
-        return "paper";
+    const choices = ["rock", "paper", "scissors"];
+    const randomNumber = Math.floor(Math.random() * 3);
+    return choices[randomNumber];
+}
+
+function playRound(humanChoice) {
+    if (gameOver) return; // Stop the game if someone already reached 5 points
+
+    const computerChoice = getComputerChoice();
+    let message = "";
+
+    if (humanChoice === computerChoice) {
+        message = `It's a tie! You both chose ${humanChoice}`;
+    } else if (
+        (humanChoice === "rock" && computerChoice === "scissors") ||
+        (humanChoice === "paper" && computerChoice === "rock") ||
+        (humanChoice === "scissors" && computerChoice === "paper")
+    ) {
+        humanScore++;
+        message = `You win this round! ${humanChoice} beats ${computerChoice}`;
     } else {
-        return "scissors";
+        computerScore++;
+        message = `You lose this round! ${computerChoice} beats ${humanChoice}`;
     }
+
+    updateUI(message);
+    checkWinner();
 }
 
-function getHumanChoice() {
-    let choice = prompt("Round Start! Enter rock, paper, or scissors:");
-    if (choice === null) return "";
-    return choice;
+function updateUI(roundMessage) {
+    roundResultDisplay.textContent = roundMessage;
+    scoreDisplay.textContent = `You: ${humanScore} | Computer: ${computerScore}`;
 }
 
-// --- Section 2: Main Game Logic ---
-
-function playGame() {
-    // Score Variables
-    let humanScore = 0;
-    let computerScore = 0;
-
-    // Single Round Logic
-    function playRound(humanChoice, computerChoice) {
-        let humanChoiceLower = humanChoice.toLowerCase();
-
-        if (humanChoiceLower === computerChoice) {
-            console.log(`It's a tie! You both chose ${humanChoiceLower}`);
-        } else if (
-            (humanChoiceLower === "rock" && computerChoice === "scissors") ||
-            (humanChoiceLower === "paper" && computerChoice === "rock") ||
-            (humanChoiceLower === "scissors" && computerChoice === "paper")
-        ) {
-            humanScore++;
-            console.log(`You win! ${humanChoiceLower} beats ${computerChoice}`);
+function checkWinner() {
+    if (humanScore === 5 || computerScore === 5) {
+        gameOver = true;
+        if (humanScore === 5) {
+            finalWinnerDisplay.textContent = "🏆 Congratulations! You reached 5 points first!";
+            finalWinnerDisplay.style.color = "green";
         } else {
-            computerScore++;
-            console.log(`You lose! ${computerChoice} beats ${humanChoiceLower}`);
+            finalWinnerDisplay.textContent = "😢 Game Over. The computer reached 5 points first.";
+            finalWinnerDisplay.style.color = "red";
         }
     }
-
-    // Play 5 Rounds
-    for (let i = 1; i <= 5; i++) {
-        console.log(`--- Round ${i} ---`);
-
-        const humanSelection = getHumanChoice();
-        const computerSelection = getComputerChoice();
-
-        playRound(humanSelection, computerSelection);
-    }
-
-    // Final Results
-    console.log("-------------------------------");
-    console.log(`Final Score -> You: ${humanScore} | Computer: ${computerScore}`);
-
-    if (humanScore > computerScore) {
-        console.log("🏆 Congratulations! You won the game!");
-    } else if (humanScore < computerScore) {
-        console.log("😢 Game Over. The computer won.");
-    } else {
-        console.log("🤝 It's a draw match!");
-    }
 }
 
-// --- Section 3: Start the Game ---
-playGame();
+// Event Listeners for Buttons
+document.querySelector("#rock").addEventListener("click", () => playRound("rock"));
+document.querySelector("#paper").addEventListener("click", () => playRound("paper"));
+document.querySelector("#scissors").addEventListener("click", () => playRound("scissors"));
